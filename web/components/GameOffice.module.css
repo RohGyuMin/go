@@ -54,6 +54,40 @@
   padding: 0 5px;
 }
 
+/* 방(팀) 탭 */
+.rooms {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.roomTab {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.roomTab:hover {
+  border-color: var(--accent);
+  color: var(--fg);
+}
+.roomActive {
+  color: #06122e;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.roomCount {
+  font-size: 11px;
+  opacity: 0.75;
+  margin-left: 2px;
+}
+
 /* 사무실 2D 맵 */
 .mapWrap {
   border: 1px solid var(--border);

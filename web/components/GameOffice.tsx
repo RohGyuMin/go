@@ -4,7 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   EMPTY_STATE,
   PRIORITY_RANK,
+  agentRoom,
   depsReady,
+  roomsOf,
   type GameState,
   type Priority,
   type Task,
@@ -28,6 +30,7 @@ function uid(prefix: string) {
 export default function GameOffice() {
   const [state, setState] = useState<GameState>(EMPTY_STATE);
   const [sel, setSel] = useState<string>("nova");
+  const [roomId, setRoomId] = useState<string>("");
   const [savedAt, setSavedAt] = useState<string>("");
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -70,9 +73,31 @@ export default function GameOffice() {
     }
   }, []);
 
-  const agents = state.agents;
-  const working = agents.filter((a) => a.status === "working").length;
-  const selAgent = useMemo(() => agents.find((a) => a.id === sel), [agents, sel]);
+  const rooms = useMemo(() => roomsOf(state), [state]);
+  // 현재 방: 유효하지 않으면 첫 방으로 보정
+  const curRoom = rooms.find((r) => r.id === roomId) ?? rooms[0];
+  useEffect(() => {
+    if (curRoom && curRoom.id !== roomId) setRoomId(curRoom.id);
+  }, [curRoom, roomId]);
+
+  // 현재 방 소속 에이전트 / 그 방의 업무만 보여준다
+  const roomAgents = useMemo(
+    () => state.agents.filter((a) => agentRoom(a, rooms) === curRoom?.id),
+    [state.agents, rooms, curRoom],
+  );
+  const roomAgentIds = useMemo(() => new Set(roomAgents.map((a) => a.id)), [roomAgents]);
+  const roomTasks = useMemo(
+    () => state.tasks.filter((t) => roomAgentIds.has(t.assignee)),
+    [state.tasks, roomAgentIds],
+  );
+
+  const agents = roomAgents;
+  const working = state.agents.filter((a) => a.status === "working").length;
+  const selAgent = useMemo(() => roomAgents.find((a) => a.id === sel), [roomAgents, sel]);
+  // 방을 바꿔 선택 캐릭터가 그 방에 없으면 첫 캐릭터로
+  useEffect(() => {
+    if (roomAgents.length > 0 && !roomAgents.some((a) => a.id === sel)) setSel(roomAgents[0].id);
+  }, [roomAgents, sel]);
 
   // ── 액션 ──
   const addTask = (
@@ -129,9 +154,27 @@ export default function GameOffice() {
         결과·대화를 도로 씁니다. 이 화면은 2초마다 그 변화를 반영합니다. (API 키·비용 0 · Max 구독 안에서)
       </p>
 
+      {/* 방(팀) 탭 — 팀마다 자기 방·자기 업무 보드 */}
+      {rooms.length > 1 && (
+        <div className={styles.rooms}>
+          {rooms.map((r) => {
+            const n = state.agents.filter((a) => agentRoom(a, rooms) === r.id).length;
+            return (
+              <button
+                key={r.id}
+                className={`${styles.roomTab} ${r.id === curRoom?.id ? styles.roomActive : ""}`}
+                onClick={() => setRoomId(r.id)}
+              >
+                {r.emoji ? `${r.emoji} ` : ""}{r.name} <span className={styles.roomCount}>{n}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* 사무실 2D 맵 — 아바타로 걸어다니며 데스크에서 상호작용 */}
       <div className={styles.mapWrap}>
-        <OfficeMap agents={agents} tasks={state.tasks} selected={sel} onSelect={setSel} />
+        <OfficeMap agents={agents} tasks={roomTasks} selected={sel} onSelect={setSel} />
       </div>
       <p className={styles.mapHint}>
         이동 <b>WASD</b>/화살표 · 데스크에 다가가 <b>스페이스</b>로 대화/업무 (데스크 클릭도 가능)
@@ -142,7 +185,7 @@ export default function GameOffice() {
         <div>
           <div className={styles.board}>
             {COLS.map((col) => {
-              const items = state.tasks
+              const items = roomTasks
                 .filter((t) => col.match(t.status))
                 .sort(
                   (a, b) =>
@@ -214,7 +257,7 @@ export default function GameOffice() {
             })}
           </div>
 
-          <AddTaskForm agents={agents} tasks={state.tasks} onAdd={addTask} />
+          <AddTaskForm agents={agents} tasks={roomTasks} onAdd={addTask} />
         </div>
 
         {/* 채팅 */}

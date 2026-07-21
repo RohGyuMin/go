@@ -1,8 +1,13 @@
 {
+  "rooms": [
+    { "id": "dev", "name": "개발팀", "emoji": "🛠️" },
+    { "id": "research", "name": "리서치팀", "emoji": "🔬" }
+  ],
   "agents": [
-    { "id": "nova", "name": "노바", "role": "프론트엔드 엔지니어", "emoji": "🛠️", "status": "idle" },
-    { "id": "echo", "name": "에코", "role": "리서처", "emoji": "🔎", "status": "idle" },
-    { "id": "pax", "name": "팩스", "role": "코드 리뷰어", "emoji": "🧪", "status": "idle" }
+    { "id": "nova", "name": "노바", "role": "프론트엔드 엔지니어", "emoji": "🛠️", "room": "dev", "status": "idle" },
+    { "id": "pax", "name": "팩스", "role": "코드 리뷰어", "emoji": "🧪", "room": "dev", "status": "idle" },
+    { "id": "echo", "name": "에코", "role": "리서처", "emoji": "🔎", "room": "research", "status": "idle" },
+    { "id": "iris", "name": "아이리스", "role": "데이터 분석가", "emoji": "📊", "room": "research", "status": "idle" }
   ],
   "tasks": [
     {
@@ -11,6 +16,7 @@
       "detail": "microworlds/ 하위 README들의 오타/깨진 링크를 훑고 요약해줘.",
       "assignee": "echo",
       "status": "todo",
+      "priority": "normal",
       "createdBy": "player"
     }
   ],

@@ -6,11 +6,20 @@
 // (막히면 blocked)
 export type TaskStatus = "todo" | "doing" | "review" | "approved" | "done" | "blocked";
 
+/** 방(팀) — 여러 팀이 각자의 사무실 방에서 일한다. */
+export interface Room {
+  id: string;
+  name: string;
+  emoji?: string;
+}
+
 export interface Agent {
   id: string;
   name: string;
   role: string;
   emoji: string;
+  /** 소속 방(팀) id. 없으면 첫 번째(기본) 방 소속으로 취급. */
+  room?: string;
   /** idle | working — 지금 일하는 중인지 (UI 애니메이션용) */
   status: "idle" | "working";
 }
@@ -57,8 +66,21 @@ export interface GameState {
   agents: Agent[];
   tasks: Task[];
   chat: ChatMessage[];
+  /** 방(팀) 목록. 없거나 비면 단일 기본 방으로 취급한다. */
+  rooms?: Room[];
   /** 낙관적 동시성/디버그용 단조 증가 버전 */
   rev: number;
 }
 
-export const EMPTY_STATE: GameState = { agents: [], tasks: [], chat: [], rev: 0 };
+export const EMPTY_STATE: GameState = { agents: [], tasks: [], chat: [], rooms: [], rev: 0 };
+
+/** 방 목록 (없으면 기본 방 하나). 항상 최소 1개를 보장한다. */
+export const DEFAULT_ROOM: Room = { id: "main", name: "사무실", emoji: "🏢" };
+export function roomsOf(state: GameState): Room[] {
+  return state.rooms && state.rooms.length > 0 ? state.rooms : [DEFAULT_ROOM];
+}
+
+/** agent 가 속한 방 id (없으면 첫 번째 방) */
+export function agentRoom(agent: Agent, rooms: Room[]): string {
+  return agent.room ?? rooms[0]?.id ?? DEFAULT_ROOM.id;
+}

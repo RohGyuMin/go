@@ -6,11 +6,16 @@ API 키·토큰 비용 없이 Max 구독 안에서 동작합니다.
 
 ## 상태 파일 형태
 `web/game/state.json` — 타입 정의는 `web/lib/game.ts` 참조.
-- `agents[]` : 캐릭터(id·이름·역할·emoji·status)
-- `tasks[]`  : 업무(id·title·detail·assignee·status·result)
-  - `status`: `todo` → `doing` → `done` (막히면 `blocked`)
+- `rooms[]` : 방(팀) 목록(id·name·emoji). 없거나 비면 단일 기본 방으로 취급.
+- `agents[]` : 캐릭터(id·이름·역할·emoji·`room`(소속 팀)·status)
+- `tasks[]`  : 업무(id·title·detail·assignee·status·`priority`·`dependsOn`·result)
+  - `status`: `todo` → `doing` → `review`/`approved` → `done` (막히면 `blocked`)
+  - `priority`: `high`/`normal`/`low`, `dependsOn`: 선행 업무 id들(모두 done이어야 착수)
 - `chat[]`   : 대화(agent·from(`player`|`agent`)·text)
 - `rev`      : 단조 증가 버전 (편집 후 반드시 +1)
+
+> 방(팀)은 화면을 나눌 뿐, 업무는 담당 캐릭터(`assignee`)의 소속 방 보드에 자동으로 표시된다.
+> Claude Code는 방 구분 없이 모든 대기 업무를 처리하면 된다(우선순위·의존성만 지킨다).
 
 ## Claude Code가 할 일 (사람이 "게임 업무 처리해줘"라고 하면)
 
