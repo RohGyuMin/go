@@ -68,6 +68,7 @@ export default function GameOffice() {
   }, []);
 
   const agents = state.agents;
+  const working = agents.filter((a) => a.status === "working").length;
   const selAgent = useMemo(() => agents.find((a) => a.id === sel), [agents, sel]);
 
   // ── 액션 ──
@@ -99,6 +100,9 @@ export default function GameOffice() {
       <div className={styles.head}>
         <h1>🏢 AI 사무실</h1>
         <span className={styles.muted}>캐릭터에게 업무를 배정하고 대화하세요</span>
+        {working > 0 && (
+          <span className={styles.workingBadge}>🟠 {working}명 동시 작업 중</span>
+        )}
       </div>
       <p className={styles.hint}>
         업무를 만들어 배정한 뒤, <b>Claude Code(나)</b>에게 <code>게임 업무 처리해줘</code> 라고 하면
