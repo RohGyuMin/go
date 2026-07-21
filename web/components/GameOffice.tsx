@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   EMPTY_STATE,
+  PRIORITY_RANK,
+  depsReady,
   type GameState,
+  type Priority,
   type Task,
   type TaskStatus,
 } from "@/lib/game";
@@ -72,7 +75,13 @@ export default function GameOffice() {
   const selAgent = useMemo(() => agents.find((a) => a.id === sel), [agents, sel]);
 
   // ── 액션 ──
-  const addTask = (title: string, detail: string, assignee: string) => {
+  const addTask = (
+    title: string,
+    detail: string,
+    assignee: string,
+    priority: Priority,
+    dependsOn: string[],
+  ) => {
     if (!title.trim()) return;
     const task: Task = {
       id: uid("t"),
@@ -80,6 +89,8 @@ export default function GameOffice() {
       detail: detail.trim(),
       assignee,
       status: "todo",
+      priority,
+      ...(dependsOn.length ? { dependsOn } : {}),
       createdBy: "player",
     };
     save({ ...state, tasks: [...state.tasks, task] });
@@ -131,22 +142,45 @@ export default function GameOffice() {
         <div>
           <div className={styles.board}>
             {COLS.map((col) => {
-              const items = state.tasks.filter((t) => col.match(t.status));
+              const items = state.tasks
+                .filter((t) => col.match(t.status))
+                .sort(
+                  (a, b) =>
+                    PRIORITY_RANK[b.priority ?? "normal"] - PRIORITY_RANK[a.priority ?? "normal"],
+                );
               return (
                 <div key={col.key} className={styles.col}>
                   <div className={styles.colHead}>
                     <span>{col.label}</span>
                     <span>{items.length}</span>
                   </div>
-                  {items.map((t) => (
+                  {items.map((t) => {
+                    const pr = t.priority ?? "normal";
+                    const locked = t.status === "todo" && !depsReady(t, state.tasks);
+                    const blockers = (t.dependsOn ?? [])
+                      .map((id) => state.tasks.find((x) => x.id === id))
+                      .filter((x): x is Task => !!x && x.status !== "done");
+                    return (
                     <div key={t.id} className={styles.taskCard}>
-                      <div className={styles.taskTitle}>{t.title}</div>
+                      <div className={styles.taskTitle}>
+                        {pr !== "normal" && (
+                          <span className={`${styles.prio} ${pr === "high" ? styles.prioHigh : styles.prioLow}`}>
+                            {pr === "high" ? "🔴 높음" : "⚪ 낮음"}
+                          </span>
+                        )}
+                        {t.title}
+                      </div>
                       <div className={styles.taskMeta}>
                         담당: {agentName(t.assignee)}
                         {t.status === "blocked" ? " · ⛔ 막힘" : ""}
                         {t.status === "review" ? " · 🔎 확인 대기" : ""}
                         {t.status === "approved" ? " · ✅ 승인됨" : ""}
                       </div>
+                      {locked && blockers.length > 0 && (
+                        <div className={styles.locked}>
+                          ⛓️ 대기: {blockers.map((b) => b.title).join(", ")} 완료 후 시작
+                        </div>
+                      )}
                       {t.result && (
                         <div className={styles.taskResult}>
                           {t.status === "review" ? "📝" : "✅"} {t.result}
@@ -173,13 +207,14 @@ export default function GameOffice() {
                         </a>
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })}
           </div>
 
-          <AddTaskForm agents={agents} onAdd={addTask} />
+          <AddTaskForm agents={agents} tasks={state.tasks} onAdd={addTask} />
         </div>
 
         {/* 채팅 */}
@@ -204,25 +239,33 @@ export default function GameOffice() {
 
 function AddTaskForm({
   agents,
+  tasks,
   onAdd,
 }: {
   agents: GameState["agents"];
-  onAdd: (title: string, detail: string, assignee: string) => void;
+  tasks: Task[];
+  onAdd: (title: string, detail: string, assignee: string, priority: Priority, dependsOn: string[]) => void;
 }) {
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [assignee, setAssignee] = useState(agents[0]?.id ?? "");
+  const [priority, setPriority] = useState<Priority>("normal");
+  const [dep, setDep] = useState("");
   useEffect(() => {
     if (!assignee && agents[0]) setAssignee(agents[0].id);
   }, [agents, assignee]);
+  // 선행 업무 후보: 아직 완료되지 않은 업무들
+  const depChoices = tasks.filter((t) => t.status !== "done");
   return (
     <form
       className={styles.addForm}
       onSubmit={(e) => {
         e.preventDefault();
-        onAdd(title, detail, assignee || agents[0]?.id || "");
+        onAdd(title, detail, assignee || agents[0]?.id || "", priority, dep ? [dep] : []);
         setTitle("");
         setDetail("");
+        setPriority("normal");
+        setDep("");
       }}
     >
       <input placeholder="업무 제목 (예: 로그인 버튼 스타일 수정)" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -232,6 +275,21 @@ function AddTaskForm({
           {agents.map((a) => (
             <option key={a.id} value={a.id}>
               {a.emoji} {a.name} · {a.role}
+            </option>
+          ))}
+        </select>
+        <select value={priority} onChange={(e) => setPriority(e.target.value as Priority)} aria-label="우선순위">
+          <option value="high">🔴 높음</option>
+          <option value="normal">🟡 보통</option>
+          <option value="low">⚪ 낮음</option>
+        </select>
+      </div>
+      <div className={styles.row}>
+        <select value={dep} onChange={(e) => setDep(e.target.value)} aria-label="선행 업무">
+          <option value="">선행 업무 없음</option>
+          {depChoices.map((t) => (
+            <option key={t.id} value={t.id}>
+              ⛓️ 먼저: {t.title}
             </option>
           ))}
         </select>
