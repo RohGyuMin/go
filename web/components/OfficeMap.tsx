@@ -8,6 +8,17 @@ const DESK_W = 120;
 const DESK_H = 74;
 const NEAR = 95;
 
+/** 방을 꾸미는 소품들 (좌표는 WORLD 기준). 상호작용 없이 분위기만 낸다. */
+const DECOR: { x: number; y: number; emoji: string; label?: string }[] = [
+  { x: 40, y: 40, emoji: "🪴" },
+  { x: 680, y: 40, emoji: "🪴" },
+  { x: 40, y: 285, emoji: "🌿" },
+  { x: 680, y: 285, emoji: "🚰", label: "정수기" },
+  { x: 360, y: 30, emoji: "📋", label: "화이트보드" },
+  { x: 360, y: 292, emoji: "🛋️", label: "라운지" },
+  { x: 410, y: 292, emoji: "☕" },
+];
+
 interface Props {
   agents: Agent[];
   tasks: Task[];
@@ -154,6 +165,33 @@ export default function OfficeMap({ agents, tasks, selected, onSelect }: Props) 
       }
       ctx.globalAlpha = 1;
 
+      // 가운데 러그(카펫) — 작업 구역을 시각적으로 묶어준다
+      ctx.fillStyle = "#141d33";
+      ctx.globalAlpha = 0.7;
+      roundRect(ctx, 96 * SX, 66 * SY, (WORLD.w - 192) * SX, (WORLD.h - 132) * SY, 18 * SX);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // 소품(플랜트·화이트보드·정수기·라운지 등)
+      DECOR.forEach((d) => {
+        const X = d.x * SX, Y = d.y * SY;
+        ctx.font = `${24 * SX}px serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(d.emoji, X, Y);
+        if (d.label) {
+          ctx.font = `${9.5 * SX}px -apple-system, sans-serif`;
+          ctx.fillStyle = c("--muted", "#9aa6bd");
+          ctx.fillText(d.label, X, Y + 17 * SY);
+        }
+      });
+
+      // 방 벽(테두리)
+      ctx.strokeStyle = c("--border", "#2a3350");
+      ctx.lineWidth = 3;
+      roundRect(ctx, 2, 2, view.w - 4, view.h - 4, 12);
+      ctx.stroke();
+
       // 데스크 + 에이전트
       const agents = agentsRef.current;
       agents.forEach((a, i) => {
@@ -163,6 +201,10 @@ export default function OfficeMap({ agents, tasks, selected, onSelect }: Props) 
         const isSel = selRef.current === a.id;
         const isNear = near === a.id;
         const X = dx * SX, Y = dy * SY;
+        // 책상 그림자(입체감)
+        ctx.fillStyle = "rgba(0,0,0,0.28)";
+        roundRect(ctx, X - (DESK_W / 2) * SX, Y - (DESK_H / 2 - 4) * SY, DESK_W * SX, DESK_H * SY, 10 * SX);
+        ctx.fill();
         // 책상
         ctx.fillStyle = "#1b2438";
         roundRect(ctx, X - (DESK_W / 2) * SX, Y - (DESK_H / 2) * SY, DESK_W * SX, DESK_H * SY, 10 * SX);
