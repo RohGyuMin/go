@@ -64,13 +64,28 @@ sequenceDiagram
 - `.github/workflows/explanation-check.yml`: 코드 변경 PR에 설명 문서가 없으면 CI 실패.
 - `.github/pull_request_template.md`: PR마다 자가검증 체크리스트를 노출.
 
-### B. 모든 프로젝트에 적용 (전역 설치)
-슬래시 커맨드를 유저 레벨(`~/.claude/commands/`)에 설치하면 **어떤 저장소에서든** `/explain-diff`,
-`/micro-world`, `/share-to-space`가 뜹니다.
+### B. 모든 프로젝트에 적용 (전역 설치) ⭐
+저장소마다 복붙하지 않고, 유저 레벨에 한 번만 설치하면 **모든 프로젝트**에 자동 반영됩니다.
 ```bash
-./scripts/install-global.sh              # 전역 커맨드 설치
-./scripts/install-global.sh --with-rule  # + 전역 ~/.claude/CLAUDE.md 에 자가검증 규칙 추가
+./scripts/install-global.sh --all        # 아래 3가지를 전부 전역 설치 (권장)
 ```
+`--all`은 다음 세 가지를 유저 레벨에 심습니다:
+
+| 대상 | 위치 | 효과 |
+|------|------|------|
+| 슬래시 커맨드 | `~/.claude/commands/` | 어느 저장소에서든 `/explain-diff`·`/micro-world`·`/share-to-space` |
+| 자가검증 규칙 | `~/.claude/CLAUDE.md` | 모든 프로젝트에서 Claude가 규칙을 인지 |
+| push 리마인더 훅 | `git --global core.hooksPath` | 모든 git 저장소의 push 전 리마인더 |
+
+개별로도 켤 수 있습니다:
+```bash
+./scripts/install-global.sh                    # 커맨드만
+./scripts/install-global.sh --with-rule        # + 전역 규칙
+./scripts/install-global.sh --global-git-hooks # + 전역 git 훅
+```
+> ⚠️ `--global-git-hooks`는 `git --global core.hooksPath`를 설정합니다. 이미 다른 값이 설정돼
+> 있으면 덮어쓰지 않고 안내만 합니다. 해제는 `git config --global --unset core.hooksPath`.
+> 이 설정은 **머신/계정 단위**이므로, 여러 대에서 쓰면 각 머신에서 한 번씩 실행하세요.
 
 ### C. Obsidian 볼트에 지식 축적 (선택)
 `OBSIDIAN_VAULT` 환경변수를 설정하면 `/explain-diff`가 프로젝트 `docs/explanations/`에 더해

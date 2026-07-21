@@ -18,8 +18,8 @@ AI가 코드를 **빠르게 작성**하는 시대에, 병목은 작성 속도가
 # 1) git 훅 설치 (push 전 설명문서+퀴즈 리마인더) — 이 프로젝트에만
 ./scripts/install-hooks.sh
 
-# 1-b) 모든 프로젝트에서 /explain-diff 등을 쓰려면 전역 설치
-./scripts/install-global.sh --with-rule
+# 1-b) 모든 프로젝트에 한 번에 반영 (커맨드 + 규칙 + 전역 git 훅)
+./scripts/install-global.sh --all
 
 # 1-c) (선택) 설명 문서를 Obsidian 볼트에도 축적하려면
 export OBSIDIAN_VAULT="$HOME/Documents/ObsidianVault"   # 셸 프로필에 추가
