@@ -57,11 +57,34 @@ sequenceDiagram
 
 ## 도입 방법
 
+### A. 이 프로젝트에만 적용
 ```bash
 ./scripts/install-hooks.sh          # push 전 리마인더 훅 설치
 ```
 - `.github/workflows/explanation-check.yml`: 코드 변경 PR에 설명 문서가 없으면 CI 실패.
 - `.github/pull_request_template.md`: PR마다 자가검증 체크리스트를 노출.
+
+### B. 모든 프로젝트에 적용 (전역 설치)
+슬래시 커맨드를 유저 레벨(`~/.claude/commands/`)에 설치하면 **어떤 저장소에서든** `/explain-diff`,
+`/micro-world`, `/share-to-space`가 뜹니다.
+```bash
+./scripts/install-global.sh              # 전역 커맨드 설치
+./scripts/install-global.sh --with-rule  # + 전역 ~/.claude/CLAUDE.md 에 자가검증 규칙 추가
+```
+
+### C. Obsidian 볼트에 지식 축적 (선택)
+`OBSIDIAN_VAULT` 환경변수를 설정하면 `/explain-diff`가 프로젝트 `docs/explanations/`에 더해
+**Obsidian 볼트에도** 같은 설명 문서를 저장합니다. 프로젝트를 넘나드는 개인 지식 그래프가 됩니다.
+```bash
+# 셸 프로필(~/.zshrc 또는 ~/.bashrc)에 추가
+export OBSIDIAN_VAULT="$HOME/Documents/ObsidianVault"   # ← 본인 볼트 경로
+```
+- 저장 위치: `$OBSIDIAN_VAULT/AI-협업/설명문서/<프로젝트명>/<YYYY-MM-DD>-<slug>.md`
+- Obsidian **frontmatter**(tags·project·branch·created·quiz_passed) + `[[위키링크]]` + **MOC 인덱스** 자동 구성.
+- 형식: [`templates/obsidian-note.md`](../templates/obsidian-note.md)
+- 볼트는 개인 파일이므로 git 에 커밋하지 않습니다(프로젝트 문서는 그대로 커밋).
+- 퀴즈 채점 후 노트의 `quiz_passed` 값을 `true`/`false`로 갱신하면, Obsidian에서
+  "아직 이해 못 한 변경"을 쿼리로 모아 볼 수 있습니다.
 
 ## 자주 묻는 질문
 
