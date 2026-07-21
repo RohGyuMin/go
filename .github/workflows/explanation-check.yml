@@ -1,0 +1,56 @@
+name: Explanation & Quiz Gate
+
+# 축 1 CI 게이트: 코드가 바뀐 PR 은 설명 문서(+퀴즈)를 동반해야 합니다.
+# 사람의 "이해도" 자체는 자동 검증 불가 → 문서·퀴즈의 "존재"만 강제합니다.
+# 자가검증 규칙(퀴즈 통과 여부)은 사람이 정직하게 지키는 규칙입니다.
+
+on:
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  explanation-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 설명 문서 존재 여부 확인
+        run: |
+          BASE="origin/${{ github.base_ref }}"
+          git fetch origin "${{ github.base_ref }}" --depth=1 || true
+
+          # 코드 변경 (문서/설정 제외)
+          CODE_CHANGED="$(git diff --name-only "$BASE"...HEAD -- . \
+            ':(exclude)docs/**' ':(exclude)*.md' ':(exclude).github/**' || true)"
+          # 설명 문서 변경
+          DOC_CHANGED="$(git diff --name-only "$BASE"...HEAD -- 'docs/explanations/*.md' || true)"
+
+          echo "── 코드 변경 ──"; echo "${CODE_CHANGED:-(없음)}"
+          echo "── 설명 문서 ──"; echo "${DOC_CHANGED:-(없음)}"
+
+          if [[ -z "$CODE_CHANGED" ]]; then
+            echo "✓ 코드 변경 없음 — 게이트 통과"; exit 0
+          fi
+
+          if [[ -z "$DOC_CHANGED" ]]; then
+            echo "::error::코드가 변경되었지만 설명 문서(docs/explanations/*.md)가 없습니다."
+            echo "Claude Code 에서 /explain-diff 를 실행해 설명 문서와 5문항 퀴즈를 생성하세요."
+            exit 1
+          fi
+
+          # 퀴즈 5문항 대략 포함 여부 확인 (Q1..Q5 또는 5개 이상의 문항 마커)
+          MISSING_QUIZ=0
+          for f in $DOC_CHANGED; do
+            [[ -f "$f" ]] || continue
+            QN=$(grep -Eoc '(^|[^A-Za-z])Q[1-5][^0-9]|^\*\*Q[0-9]' "$f" || true)
+            if [[ "${QN:-0}" -lt 5 ]]; then
+              echo "::warning file=$f::퀴즈 문항이 5개 미만으로 보입니다 (감지: ${QN:-0}). 확인하세요."
+              MISSING_QUIZ=1
+            fi
+          done
+
+          echo "✓ 설명 문서 확인 완료 — 게이트 통과"
+          echo "ℹ️ 자가검증(퀴즈 4문항 이상 통과)은 작성자가 정직하게 지키는 규칙입니다."
+          exit 0

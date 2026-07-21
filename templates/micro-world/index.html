@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Micro World — 타임라인 디버거</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         margin: 0; padding: 16px; }
+  header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 18px; margin: 0 8px 0 0; }
+  .muted { opacity: .6; }
+  .bar { display: flex; align-items: center; gap: 12px; margin: 16px 0;
+         position: sticky; top: 0; padding: 8px 0; backdrop-filter: blur(6px); }
+  input[type=range] { flex: 1; }
+  button { font: inherit; padding: 4px 12px; cursor: pointer; }
+  .step-meta { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+  .chip { padding: 2px 10px; border: 1px solid currentColor; border-radius: 999px; font-size: 12px; opacity: .8; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  .panel { border: 1px solid rgba(128,128,128,.35); border-radius: 8px; padding: 12px; overflow: auto; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; opacity: .6; margin: 0 0 8px; }
+  pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+  /* 배열 시각화 (커스터마이즈 지점) */
+  .bars { display: flex; align-items: flex-end; gap: 4px; height: 160px; }
+  .bars > div { flex: 1; background: currentColor; min-width: 6px; border-radius: 3px 3px 0 0;
+                display: flex; justify-content: center; align-items: flex-start; color: #fff; font-size: 10px; }
+  .bars > div span { color: #000; margin-top: -14px; }
+  .note { margin-top: 10px; padding: 8px 10px; border-left: 3px solid currentColor; opacity: .85; }
+  .drop { border: 2px dashed rgba(128,128,128,.5); border-radius: 8px; padding: 24px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌍 Micro World</h1>
+  <span class="muted">타임라인을 스크럽하며 내부 상태 변화를 관찰하세요</span>
+</header>
+
+<div id="loader"></div>
+<main id="app" hidden>
+  <div class="bar">
+    <button id="prev" title="이전 스텝 (←)">◀</button>
+    <button id="play" title="재생/정지 (space)">▶</button>
+    <button id="next" title="다음 스텝 (→)">▶</button>
+    <input type="range" id="slider" min="0" value="0" />
+    <span id="counter" class="muted">0 / 0</span>
+  </div>
+
+  <div class="step-meta">
+    <span class="chip" id="label">—</span>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>상태 시각화</h2>
+      <div id="viz"></div>
+      <div class="note" id="note" hidden></div>
+    </section>
+    <section class="panel">
+      <h2>Raw State (JSON)</h2>
+      <pre id="raw"></pre>
+    </section>
+  </div>
+</main>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// Micro World 뷰어. trace.json 형식:
+//   [ { "step": 0, "label": "init", "state": {...}, "note": "..." }, ... ]
+// trace.json 을 자동 로드하고, 실패하면 파일 드롭/선택 UI 를 보여줍니다.
+// ─────────────────────────────────────────────────────────────
+let trace = [];
+let i = 0, timer = null;
+
+const $ = (id) => document.getElementById(id);
+
+async function boot() {
+  try {
+    const res = await fetch('./trace.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('no trace.json');
+    trace = await res.json();
+    start();
+  } catch (e) {
+    showLoader();
+  }
+}
+
+function showLoader() {
+  $('loader').innerHTML = `
+    <div class="drop" id="drop">
+      <p><b>trace.json</b> 을 찾지 못했습니다.</p>
+      <p class="muted">계측을 실행해 trace.json 을 생성한 뒤 이 파일 옆에 두거나,<br>
+      아래에서 파일을 선택/드롭하세요.</p>
+      <input type="file" id="file" accept="application/json,.json" />
+    </div>`;
+  $('file').addEventListener('change', (ev) => {
+    const f = ev.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { trace = JSON.parse(r.result); $('loader').innerHTML = ''; start(); };
+    r.readAsText(f);
+  });
+  const drop = $('drop');
+  drop.addEventListener('dragover', e => { e.preventDefault(); });
+  drop.addEventListener('drop', e => {
+    e.preventDefault();
+    const f = e.dataTransfer.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { trace = JSON.parse(r.result); $('loader').innerHTML = ''; start(); };
+    r.readAsText(f);
+  });
+}
+
+function start() {
+  if (!Array.isArray(trace) || trace.length === 0) { showLoader(); return; }
+  $('app').hidden = false;
+  const slider = $('slider');
+  slider.max = trace.length - 1;
+  slider.addEventListener('input', () => render(+slider.value));
+  $('prev').onclick = () => render(i - 1);
+  $('next').onclick = () => render(i + 1);
+  $('play').onclick = togglePlay;
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') render(i - 1);
+    else if (e.key === 'ArrowRight') render(i + 1);
+    else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+  });
+  render(0);
+}
+
+function togglePlay() {
+  if (timer) { clearInterval(timer); timer = null; $('play').textContent = '▶'; return; }
+  $('play').textContent = '⏸';
+  timer = setInterval(() => {
+    if (i >= trace.length - 1) { togglePlay(); return; }
+    render(i + 1);
+  }, 600);
+}
+
+function render(n) {
+  i = Math.max(0, Math.min(trace.length - 1, n));
+  const snap = trace[i];
+  $('slider').value = i;
+  $('counter').textContent = `${i + 1} / ${trace.length}`;
+  $('label').textContent = snap.label ?? `step ${snap.step ?? i}`;
+  $('raw').textContent = JSON.stringify(snap.state, null, 2);
+  const note = $('note');
+  if (snap.note) { note.hidden = false; note.textContent = '💬 ' + snap.note; } else { note.hidden = true; }
+  drawViz(snap.state);
+}
+
+// ── 상태 시각화 (여기를 대상에 맞게 커스터마이즈하세요) ──────────────
+// 기본 동작: state 안에서 숫자 배열을 찾으면 막대 그래프로 그립니다.
+function drawViz(state) {
+  const viz = $('viz');
+  const arr = findNumberArray(state);
+  if (arr) {
+    const max = Math.max(...arr.map(Math.abs), 1);
+    viz.innerHTML = '<div class="bars">' + arr.map(v =>
+      `<div style="height:${(Math.abs(v) / max) * 100}%"><span>${v}</span></div>`
+    ).join('') + '</div>';
+  } else {
+    viz.innerHTML = '<p class="muted">숫자 배열이 없어 기본 시각화를 생략합니다. ' +
+      'drawViz() 를 대상(그래프/상태머신/커서 등)에 맞게 수정하세요.</p>';
+  }
+}
+
+function findNumberArray(obj) {
+  if (Array.isArray(obj) && obj.every(x => typeof x === 'number')) return obj;
+  if (obj && typeof obj === 'object') {
+    for (const k of Object.keys(obj)) {
+      const r = findNumberArray(obj[k]);
+      if (r) return r;
+    }
+  }
+  return null;
+}
+
+boot();
+</script>
+</body>
+</html>

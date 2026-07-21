@@ -1,0 +1,1118 @@
+[
+  {
+    "step": 0,
+    "label": "초기화",
+    "state": {
+      "current": null,
+      "queue": [
+        "A"
+      ],
+      "visited": [
+        "A"
+      ],
+      "dist": {
+        "A": 0
+      },
+      "edge": null
+    },
+    "note": "시작 노드 A 를 큐에 넣고 거리 0."
+  },
+  {
+    "step": 1,
+    "label": "방문: A",
+    "state": {
+      "current": "A",
+      "queue": [],
+      "visited": [
+        "A"
+      ],
+      "dist": {
+        "A": 0
+      },
+      "edge": null
+    },
+    "note": "큐 앞에서 A 를 꺼내 확정한다(거리 0)."
+  },
+  {
+    "step": 2,
+    "label": "간선 검사: A–B",
+    "state": {
+      "current": "A",
+      "queue": [],
+      "visited": [
+        "A"
+      ],
+      "dist": {
+        "A": 0
+      },
+      "edge": [
+        "A",
+        "B"
+      ]
+    },
+    "note": "A 의 이웃 B 를 살펴본다."
+  },
+  {
+    "step": 3,
+    "label": "발견: B",
+    "state": {
+      "current": "A",
+      "queue": [
+        "B"
+      ],
+      "visited": [
+        "A",
+        "B"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1
+      },
+      "edge": [
+        "A",
+        "B"
+      ]
+    },
+    "note": "B 는 처음 본다 → 거리 1, 큐에 추가."
+  },
+  {
+    "step": 4,
+    "label": "간선 검사: A–C",
+    "state": {
+      "current": "A",
+      "queue": [
+        "B"
+      ],
+      "visited": [
+        "A",
+        "B"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1
+      },
+      "edge": [
+        "A",
+        "C"
+      ]
+    },
+    "note": "A 의 이웃 C 를 살펴본다."
+  },
+  {
+    "step": 5,
+    "label": "발견: C",
+    "state": {
+      "current": "A",
+      "queue": [
+        "B",
+        "C"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1
+      },
+      "edge": [
+        "A",
+        "C"
+      ]
+    },
+    "note": "C 는 처음 본다 → 거리 1, 큐에 추가."
+  },
+  {
+    "step": 6,
+    "label": "방문: B",
+    "state": {
+      "current": "B",
+      "queue": [
+        "C"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1
+      },
+      "edge": null
+    },
+    "note": "큐 앞에서 B 를 꺼내 확정한다(거리 1)."
+  },
+  {
+    "step": 7,
+    "label": "간선 검사: B–A",
+    "state": {
+      "current": "B",
+      "queue": [
+        "C"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1
+      },
+      "edge": [
+        "B",
+        "A"
+      ]
+    },
+    "note": "B 의 이웃 A 를 살펴본다."
+  },
+  {
+    "step": 8,
+    "label": "건너뜀: A",
+    "state": {
+      "current": "B",
+      "queue": [
+        "C"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1
+      },
+      "edge": [
+        "B",
+        "A"
+      ]
+    },
+    "note": "A 는 이미 방문함 → 무시."
+  },
+  {
+    "step": 9,
+    "label": "간선 검사: B–D",
+    "state": {
+      "current": "B",
+      "queue": [
+        "C"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1
+      },
+      "edge": [
+        "B",
+        "D"
+      ]
+    },
+    "note": "B 의 이웃 D 를 살펴본다."
+  },
+  {
+    "step": 10,
+    "label": "발견: D",
+    "state": {
+      "current": "B",
+      "queue": [
+        "C",
+        "D"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2
+      },
+      "edge": [
+        "B",
+        "D"
+      ]
+    },
+    "note": "D 는 처음 본다 → 거리 2, 큐에 추가."
+  },
+  {
+    "step": 11,
+    "label": "방문: C",
+    "state": {
+      "current": "C",
+      "queue": [
+        "D"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2
+      },
+      "edge": null
+    },
+    "note": "큐 앞에서 C 를 꺼내 확정한다(거리 1)."
+  },
+  {
+    "step": 12,
+    "label": "간선 검사: C–A",
+    "state": {
+      "current": "C",
+      "queue": [
+        "D"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2
+      },
+      "edge": [
+        "C",
+        "A"
+      ]
+    },
+    "note": "C 의 이웃 A 를 살펴본다."
+  },
+  {
+    "step": 13,
+    "label": "건너뜀: A",
+    "state": {
+      "current": "C",
+      "queue": [
+        "D"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2
+      },
+      "edge": [
+        "C",
+        "A"
+      ]
+    },
+    "note": "A 는 이미 방문함 → 무시."
+  },
+  {
+    "step": 14,
+    "label": "간선 검사: C–D",
+    "state": {
+      "current": "C",
+      "queue": [
+        "D"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2
+      },
+      "edge": [
+        "C",
+        "D"
+      ]
+    },
+    "note": "C 의 이웃 D 를 살펴본다."
+  },
+  {
+    "step": 15,
+    "label": "건너뜀: D",
+    "state": {
+      "current": "C",
+      "queue": [
+        "D"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2
+      },
+      "edge": [
+        "C",
+        "D"
+      ]
+    },
+    "note": "D 는 이미 방문함 → 무시."
+  },
+  {
+    "step": 16,
+    "label": "간선 검사: C–E",
+    "state": {
+      "current": "C",
+      "queue": [
+        "D"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2
+      },
+      "edge": [
+        "C",
+        "E"
+      ]
+    },
+    "note": "C 의 이웃 E 를 살펴본다."
+  },
+  {
+    "step": 17,
+    "label": "발견: E",
+    "state": {
+      "current": "C",
+      "queue": [
+        "D",
+        "E"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2
+      },
+      "edge": [
+        "C",
+        "E"
+      ]
+    },
+    "note": "E 는 처음 본다 → 거리 2, 큐에 추가."
+  },
+  {
+    "step": 18,
+    "label": "방문: D",
+    "state": {
+      "current": "D",
+      "queue": [
+        "E"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2
+      },
+      "edge": null
+    },
+    "note": "큐 앞에서 D 를 꺼내 확정한다(거리 2)."
+  },
+  {
+    "step": 19,
+    "label": "간선 검사: D–B",
+    "state": {
+      "current": "D",
+      "queue": [
+        "E"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2
+      },
+      "edge": [
+        "D",
+        "B"
+      ]
+    },
+    "note": "D 의 이웃 B 를 살펴본다."
+  },
+  {
+    "step": 20,
+    "label": "건너뜀: B",
+    "state": {
+      "current": "D",
+      "queue": [
+        "E"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2
+      },
+      "edge": [
+        "D",
+        "B"
+      ]
+    },
+    "note": "B 는 이미 방문함 → 무시."
+  },
+  {
+    "step": 21,
+    "label": "간선 검사: D–C",
+    "state": {
+      "current": "D",
+      "queue": [
+        "E"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2
+      },
+      "edge": [
+        "D",
+        "C"
+      ]
+    },
+    "note": "D 의 이웃 C 를 살펴본다."
+  },
+  {
+    "step": 22,
+    "label": "건너뜀: C",
+    "state": {
+      "current": "D",
+      "queue": [
+        "E"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2
+      },
+      "edge": [
+        "D",
+        "C"
+      ]
+    },
+    "note": "C 는 이미 방문함 → 무시."
+  },
+  {
+    "step": 23,
+    "label": "간선 검사: D–F",
+    "state": {
+      "current": "D",
+      "queue": [
+        "E"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2
+      },
+      "edge": [
+        "D",
+        "F"
+      ]
+    },
+    "note": "D 의 이웃 F 를 살펴본다."
+  },
+  {
+    "step": 24,
+    "label": "발견: F",
+    "state": {
+      "current": "D",
+      "queue": [
+        "E",
+        "F"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": [
+        "D",
+        "F"
+      ]
+    },
+    "note": "F 는 처음 본다 → 거리 3, 큐에 추가."
+  },
+  {
+    "step": 25,
+    "label": "방문: E",
+    "state": {
+      "current": "E",
+      "queue": [
+        "F"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": null
+    },
+    "note": "큐 앞에서 E 를 꺼내 확정한다(거리 2)."
+  },
+  {
+    "step": 26,
+    "label": "간선 검사: E–C",
+    "state": {
+      "current": "E",
+      "queue": [
+        "F"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": [
+        "E",
+        "C"
+      ]
+    },
+    "note": "E 의 이웃 C 를 살펴본다."
+  },
+  {
+    "step": 27,
+    "label": "건너뜀: C",
+    "state": {
+      "current": "E",
+      "queue": [
+        "F"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": [
+        "E",
+        "C"
+      ]
+    },
+    "note": "C 는 이미 방문함 → 무시."
+  },
+  {
+    "step": 28,
+    "label": "간선 검사: E–F",
+    "state": {
+      "current": "E",
+      "queue": [
+        "F"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": [
+        "E",
+        "F"
+      ]
+    },
+    "note": "E 의 이웃 F 를 살펴본다."
+  },
+  {
+    "step": 29,
+    "label": "건너뜀: F",
+    "state": {
+      "current": "E",
+      "queue": [
+        "F"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": [
+        "E",
+        "F"
+      ]
+    },
+    "note": "F 는 이미 방문함 → 무시."
+  },
+  {
+    "step": 30,
+    "label": "방문: F",
+    "state": {
+      "current": "F",
+      "queue": [],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": null
+    },
+    "note": "큐 앞에서 F 를 꺼내 확정한다(거리 3)."
+  },
+  {
+    "step": 31,
+    "label": "간선 검사: F–D",
+    "state": {
+      "current": "F",
+      "queue": [],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": [
+        "F",
+        "D"
+      ]
+    },
+    "note": "F 의 이웃 D 를 살펴본다."
+  },
+  {
+    "step": 32,
+    "label": "건너뜀: D",
+    "state": {
+      "current": "F",
+      "queue": [],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": [
+        "F",
+        "D"
+      ]
+    },
+    "note": "D 는 이미 방문함 → 무시."
+  },
+  {
+    "step": 33,
+    "label": "간선 검사: F–E",
+    "state": {
+      "current": "F",
+      "queue": [],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": [
+        "F",
+        "E"
+      ]
+    },
+    "note": "F 의 이웃 E 를 살펴본다."
+  },
+  {
+    "step": 34,
+    "label": "건너뜀: E",
+    "state": {
+      "current": "F",
+      "queue": [],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": [
+        "F",
+        "E"
+      ]
+    },
+    "note": "E 는 이미 방문함 → 무시."
+  },
+  {
+    "step": 35,
+    "label": "간선 검사: F–G",
+    "state": {
+      "current": "F",
+      "queue": [],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3
+      },
+      "edge": [
+        "F",
+        "G"
+      ]
+    },
+    "note": "F 의 이웃 G 를 살펴본다."
+  },
+  {
+    "step": 36,
+    "label": "발견: G",
+    "state": {
+      "current": "F",
+      "queue": [
+        "G"
+      ],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3,
+        "G": 4
+      },
+      "edge": [
+        "F",
+        "G"
+      ]
+    },
+    "note": "G 는 처음 본다 → 거리 4, 큐에 추가."
+  },
+  {
+    "step": 37,
+    "label": "방문: G",
+    "state": {
+      "current": "G",
+      "queue": [],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3,
+        "G": 4
+      },
+      "edge": null
+    },
+    "note": "큐 앞에서 G 를 꺼내 확정한다(거리 4)."
+  },
+  {
+    "step": 38,
+    "label": "간선 검사: G–F",
+    "state": {
+      "current": "G",
+      "queue": [],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3,
+        "G": 4
+      },
+      "edge": [
+        "G",
+        "F"
+      ]
+    },
+    "note": "G 의 이웃 F 를 살펴본다."
+  },
+  {
+    "step": 39,
+    "label": "건너뜀: F",
+    "state": {
+      "current": "G",
+      "queue": [],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3,
+        "G": 4
+      },
+      "edge": [
+        "G",
+        "F"
+      ]
+    },
+    "note": "F 는 이미 방문함 → 무시."
+  },
+  {
+    "step": 40,
+    "label": "완료",
+    "state": {
+      "current": null,
+      "queue": [],
+      "visited": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ],
+      "dist": {
+        "A": 0,
+        "B": 1,
+        "C": 1,
+        "D": 2,
+        "E": 2,
+        "F": 3,
+        "G": 4
+      },
+      "edge": null
+    },
+    "note": "큐가 비었다. 모든 노드의 최단 거리(간선 수)를 확정."
+  }
+]
