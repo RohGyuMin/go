@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Micro World — BFS 탐험 월드</title>
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0e1320; --fg:#e9edf5; --muted:#9aa6bd;
+    --panel:rgba(18,24,38,.82); --border:#2a3350;
+    --undisc:#485575; --queued:#f59e0b; --current:#3b82f6; --done:#22c55e;
+    --avatar:#e64980; --path:#37436a; --path-hot:#f5c451;
+    --terrain-a:#0f1626; --grid:#1a2540;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; }
+  body{ background:var(--bg); color:var(--fg);
+        font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif; padding:14px; }
+  h1{ font-size:16px; margin:0 0 8px; }
+  .muted{ color:var(--muted); }
+  #stage{ position:relative; width:100%; height:62vh; min-height:380px; border-radius:14px;
+          overflow:hidden; border:1px solid var(--border); background:var(--terrain-a); }
+  #c{ display:block; width:100%; height:100%; }
+  .hud{ position:absolute; background:var(--panel); border:1px solid var(--border);
+        border-radius:10px; padding:8px 12px; backdrop-filter:blur(6px); }
+  #hud-top{ top:10px; left:10px; right:10px; display:flex; gap:10px; align-items:baseline; }
+  #hud-top b{ font-size:14px; } #hud-top span{ color:var(--muted); }
+  #legend{ bottom:10px; left:10px; font-size:12px; display:flex; gap:12px; flex-wrap:wrap; }
+  #help{ top:10px; right:10px; font-size:12px; color:var(--muted); max-width:210px; display:none; }
+  @media(min-width:720px){ #help{ display:block; } #hud-top{ right:230px; } }
+  #mini{ position:absolute; bottom:10px; right:10px; width:160px; height:120px;
+         border:1px solid var(--border); border-radius:8px; background:rgba(8,12,20,.6); }
+  .dot{ display:inline-block; width:10px; height:10px; border-radius:50%; vertical-align:-1px; margin-right:4px; }
+  .bar{ display:flex; align-items:center; gap:10px; margin-top:12px; }
+  input[type=range]{ flex:1; accent-color:var(--current); }
+  button{ font:inherit; padding:6px 13px; border:1px solid var(--border); background:#182238; color:var(--fg);
+          border-radius:9px; cursor:pointer; }
+  button:hover{ border-color:var(--current); }
+  kbd{ background:#1c2740; border:1px solid var(--border); border-radius:5px; padding:0 5px; font-family:inherit; }
+</style>
+</head>
+<body>
+<h1>🌍 Micro World — BFS 탐험 월드 <span class="muted" style="font-weight:400">아바타를 조종해 세계를 돌아다니고, 탐색이 퍼지는 걸 목격하세요</span></h1>
+
+<div id="stage">
+  <canvas id="c"></canvas>
+  <div class="hud" id="hud-top"><b id="label">—</b><span id="note"></span></div>
+  <div class="hud" id="help">
+    이동 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / 화살표<br>
+    탐색 재생 <kbd>Space</kbd> · 스텝 <kbd>[</kbd> <kbd>]</kbd><br>
+    리셋 <kbd>R</kbd> · 아바타로 장소에 다가가면 자동 발견
+  </div>
+  <div class="hud" id="legend">
+    <span><span class="dot" style="background:var(--undisc)"></span>미발견(안개)</span>
+    <span><span class="dot" style="background:var(--queued)"></span>큐 대기</span>
+    <span><span class="dot" style="background:var(--current)"></span>현재</span>
+    <span><span class="dot" style="background:var(--done)"></span>확정</span>
+    <span><span class="dot" style="background:var(--avatar)"></span>나(아바타)</span>
+  </div>
+  <canvas id="mini"></canvas>
+</div>
+
+<div class="bar">
+  <button id="play">▶ 탐색 재생</button>
+  <button id="stepb">⟨ 이전</button>
+  <button id="stepf">다음 ⟩</button>
+  <input type="range" id="slider" min="0" value="0" />
+  <span id="counter" class="muted">0 / 0</span>
+</div>
+
+<script type="application/json" id="trace-data">[{"step":0,"label":"초기화","state":{"current":null,"queue":["A"],"visited":["A"],"dist":{"A":0},"edge":null},"note":"시작 노드 A 를 큐에 넣고 거리 0."},{"step":1,"label":"방문: A","state":{"current":"A","queue":[],"visited":["A"],"dist":{"A":0},"edge":null},"note":"큐 앞에서 A 를 꺼내 확정한다(거리 0)."},{"step":2,"label":"간선 검사: A–B","state":{"current":"A","queue":[],"visited":["A"],"dist":{"A":0},"edge":["A","B"]},"note":"A 의 이웃 B 를 살펴본다."},{"step":3,"label":"발견: B","state":{"current":"A","queue":["B"],"visited":["A","B"],"dist":{"A":0,"B":1},"edge":["A","B"]},"note":"B 는 처음 본다 → 거리 1, 큐에 추가."},{"step":4,"label":"간선 검사: A–C","state":{"current":"A","queue":["B"],"visited":["A","B"],"dist":{"A":0,"B":1},"edge":["A","C"]},"note":"A 의 이웃 C 를 살펴본다."},{"step":5,"label":"발견: C","state":{"current":"A","queue":["B","C"],"visited":["A","B","C"],"dist":{"A":0,"B":1,"C":1},"edge":["A","C"]},"note":"C 는 처음 본다 → 거리 1, 큐에 추가."},{"step":6,"label":"방문: B","state":{"current":"B","queue":["C"],"visited":["A","B","C"],"dist":{"A":0,"B":1,"C":1},"edge":null},"note":"큐 앞에서 B 를 꺼내 확정한다(거리 1)."},{"step":7,"label":"간선 검사: B–A","state":{"current":"B","queue":["C"],"visited":["A","B","C"],"dist":{"A":0,"B":1,"C":1},"edge":["B","A"]},"note":"B 의 이웃 A 를 살펴본다."},{"step":8,"label":"건너뜀: A","state":{"current":"B","queue":["C"],"visited":["A","B","C"],"dist":{"A":0,"B":1,"C":1},"edge":["B","A"]},"note":"A 는 이미 방문함 → 무시."},{"step":9,"label":"간선 검사: B–D","state":{"current":"B","queue":["C"],"visited":["A","B","C"],"dist":{"A":0,"B":1,"C":1},"edge":["B","D"]},"note":"B 의 이웃 D 를 살펴본다."},{"step":10,"label":"발견: D","state":{"current":"B","queue":["C","D"],"visited":["A","B","C","D"],"dist":{"A":0,"B":1,"C":1,"D":2},"edge":["B","D"]},"note":"D 는 처음 본다 → 거리 2, 큐에 추가."},{"step":11,"label":"방문: C","state":{"current":"C","queue":["D"],"visited":["A","B","C","D"],"dist":{"A":0,"B":1,"C":1,"D":2},"edge":null},"note":"큐 앞에서 C 를 꺼내 확정한다(거리 1)."},{"step":12,"label":"간선 검사: C–A","state":{"current":"C","queue":["D"],"visited":["A","B","C","D"],"dist":{"A":0,"B":1,"C":1,"D":2},"edge":["C","A"]},"note":"C 의 이웃 A 를 살펴본다."},{"step":13,"label":"건너뜀: A","state":{"current":"C","queue":["D"],"visited":["A","B","C","D"],"dist":{"A":0,"B":1,"C":1,"D":2},"edge":["C","A"]},"note":"A 는 이미 방문함 → 무시."},{"step":14,"label":"간선 검사: C–D","state":{"current":"C","queue":["D"],"visited":["A","B","C","D"],"dist":{"A":0,"B":1,"C":1,"D":2},"edge":["C","D"]},"note":"C 의 이웃 D 를 살펴본다."},{"step":15,"label":"건너뜀: D","state":{"current":"C","queue":["D"],"visited":["A","B","C","D"],"dist":{"A":0,"B":1,"C":1,"D":2},"edge":["C","D"]},"note":"D 는 이미 방문함 → 무시."},{"step":16,"label":"간선 검사: C–E","state":{"current":"C","queue":["D"],"visited":["A","B","C","D"],"dist":{"A":0,"B":1,"C":1,"D":2},"edge":["C","E"]},"note":"C 의 이웃 E 를 살펴본다."},{"step":17,"label":"발견: E","state":{"current":"C","queue":["D","E"],"visited":["A","B","C","D","E"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2},"edge":["C","E"]},"note":"E 는 처음 본다 → 거리 2, 큐에 추가."},{"step":18,"label":"방문: D","state":{"current":"D","queue":["E"],"visited":["A","B","C","D","E"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2},"edge":null},"note":"큐 앞에서 D 를 꺼내 확정한다(거리 2)."},{"step":19,"label":"간선 검사: D–B","state":{"current":"D","queue":["E"],"visited":["A","B","C","D","E"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2},"edge":["D","B"]},"note":"D 의 이웃 B 를 살펴본다."},{"step":20,"label":"건너뜀: B","state":{"current":"D","queue":["E"],"visited":["A","B","C","D","E"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2},"edge":["D","B"]},"note":"B 는 이미 방문함 → 무시."},{"step":21,"label":"간선 검사: D–C","state":{"current":"D","queue":["E"],"visited":["A","B","C","D","E"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2},"edge":["D","C"]},"note":"D 의 이웃 C 를 살펴본다."},{"step":22,"label":"건너뜀: C","state":{"current":"D","queue":["E"],"visited":["A","B","C","D","E"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2},"edge":["D","C"]},"note":"C 는 이미 방문함 → 무시."},{"step":23,"label":"간선 검사: D–F","state":{"current":"D","queue":["E"],"visited":["A","B","C","D","E"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2},"edge":["D","F"]},"note":"D 의 이웃 F 를 살펴본다."},{"step":24,"label":"발견: F","state":{"current":"D","queue":["E","F"],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":["D","F"]},"note":"F 는 처음 본다 → 거리 3, 큐에 추가."},{"step":25,"label":"방문: E","state":{"current":"E","queue":["F"],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":null},"note":"큐 앞에서 E 를 꺼내 확정한다(거리 2)."},{"step":26,"label":"간선 검사: E–C","state":{"current":"E","queue":["F"],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":["E","C"]},"note":"E 의 이웃 C 를 살펴본다."},{"step":27,"label":"건너뜀: C","state":{"current":"E","queue":["F"],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":["E","C"]},"note":"C 는 이미 방문함 → 무시."},{"step":28,"label":"간선 검사: E–F","state":{"current":"E","queue":["F"],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":["E","F"]},"note":"E 의 이웃 F 를 살펴본다."},{"step":29,"label":"건너뜀: F","state":{"current":"E","queue":["F"],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":["E","F"]},"note":"F 는 이미 방문함 → 무시."},{"step":30,"label":"방문: F","state":{"current":"F","queue":[],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":null},"note":"큐 앞에서 F 를 꺼내 확정한다(거리 3)."},{"step":31,"label":"간선 검사: F–D","state":{"current":"F","queue":[],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":["F","D"]},"note":"F 의 이웃 D 를 살펴본다."},{"step":32,"label":"건너뜀: D","state":{"current":"F","queue":[],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":["F","D"]},"note":"D 는 이미 방문함 → 무시."},{"step":33,"label":"간선 검사: F–E","state":{"current":"F","queue":[],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":["F","E"]},"note":"F 의 이웃 E 를 살펴본다."},{"step":34,"label":"건너뜀: E","state":{"current":"F","queue":[],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":["F","E"]},"note":"E 는 이미 방문함 → 무시."},{"step":35,"label":"간선 검사: F–G","state":{"current":"F","queue":[],"visited":["A","B","C","D","E","F"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3},"edge":["F","G"]},"note":"F 의 이웃 G 를 살펴본다."},{"step":36,"label":"발견: G","state":{"current":"F","queue":["G"],"visited":["A","B","C","D","E","F","G"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3,"G":4},"edge":["F","G"]},"note":"G 는 처음 본다 → 거리 4, 큐에 추가."},{"step":37,"label":"방문: G","state":{"current":"G","queue":[],"visited":["A","B","C","D","E","F","G"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3,"G":4},"edge":null},"note":"큐 앞에서 G 를 꺼내 확정한다(거리 4)."},{"step":38,"label":"간선 검사: G–F","state":{"current":"G","queue":[],"visited":["A","B","C","D","E","F","G"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3,"G":4},"edge":["G","F"]},"note":"G 의 이웃 F 를 살펴본다."},{"step":39,"label":"건너뜀: F","state":{"current":"G","queue":[],"visited":["A","B","C","D","E","F","G"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3,"G":4},"edge":["G","F"]},"note":"F 는 이미 방문함 → 무시."},{"step":40,"label":"완료","state":{"current":null,"queue":[],"visited":["A","B","C","D","E","F","G"],"dist":{"A":0,"B":1,"C":1,"D":2,"E":2,"F":3,"G":4},"edge":null},"note":"큐가 비었다. 모든 노드의 최단 거리(간선 수)를 확정."}]</script>
+<script>
+// ── 월드 데이터 (좌표는 월드 공간; 카메라가 아바타를 따라감) ──
+const NODES = {
+  A:[300,250], B:[720,150], C:[300,650], D:[790,520],
+  E:[380,950], F:[900,880], G:[1360,820]
+};
+const EDGES=[["A","B"],["A","C"],["B","D"],["C","D"],["C","E"],["D","F"],["E","F"],["F","G"]];
+const WORLD={w:1600,h:1120};
+const R=44; // 장소 반지름
+
+let TRACE=[];
+try{ const t=document.getElementById('trace-data').textContent.trim();
+     TRACE = (t && !t.includes('__TRACE_'+'JSON__')) ? JSON.parse(t) : []; }catch(e){}
+
+const c=document.getElementById('c'), ctx=c.getContext('2d');
+const mini=document.getElementById('mini'), mctx=mini.getContext('2d');
+const $=id=>document.getElementById(id);
+
+let cam={x:0,y:0}, avatar={x:300,y:400,dx:0,dy:1}, keys={};
+let idx=0, playing=false, playAcc=0, ripples=[], discoveredByRoam=new Set();
+let last=performance.now();
+
+// 캔버스 해상도(HiDPI)
+function fit(cv){ const r=cv.getBoundingClientRect(), d=Math.min(devicePixelRatio||1,2);
+  cv.width=Math.max(1,r.width*d); cv.height=Math.max(1,r.height*d);
+  const g=cv.getContext('2d'); g.setTransform(d,0,0,d,0,0); return {w:r.width,h:r.height}; }
+let view=fit(c); fit(mini);
+addEventListener('resize',()=>{ view=fit(c); fit(mini); });
+
+// ── 스냅샷에서 노드 상태 ──
+function snap(){ return TRACE[idx] || {state:{visited:[],queue:[],dist:{},current:null,edge:null},label:'',note:''}; }
+function nodeState(n,snapObj){
+  const s=snapObj.state;
+  if(n===s.current) return 'current';
+  if(s.queue.includes(n)) return 'queued';
+  if(s.visited.includes(n)) return 'done';
+  return 'undisc';
+}
+const COL={current:getVar('--current'),queued:getVar('--queued'),done:getVar('--done'),undisc:getVar('--undisc')};
+function getVar(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim()||'#888'; }
+
+// ── 입력 ──
+addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase?e.key.toLowerCase():e.key)) e.preventDefault();
+  if(k===' '){ togglePlay(); return; }
+  if(k==='['){ setIdx(idx-1); return; }
+  if(k===']'){ setIdx(idx+1); return; }
+  if(k==='r'){ avatar.x=300; avatar.y=400; discoveredByRoam.clear(); setIdx(0); return; }
+  keys[k]=true;
+});
+addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
+
+$('play').onclick=togglePlay;
+$('stepb').onclick=()=>setIdx(idx-1);
+$('stepf').onclick=()=>setIdx(idx+1);
+$('slider').addEventListener('input',()=>setIdx(+$('slider').value));
+
+function togglePlay(){ if(!TRACE.length) return;
+  playing=!playing; if(playing && idx>=TRACE.length-1) setIdx(0);
+  $('play').textContent = playing?'⏸ 일시정지':'▶ 탐색 재생'; }
+
+function setIdx(i){
+  if(!TRACE.length) return;
+  const ni=Math.max(0,Math.min(TRACE.length-1,i));
+  const prevCur = snap().state.current;
+  idx=ni; const s=snap();
+  $('slider').max=TRACE.length-1; $('slider').value=idx;
+  $('counter').textContent=`${idx+1} / ${TRACE.length}`;
+  $('label').textContent=s.label||'—';
+  $('note').textContent=s.note?('· '+s.note):'';
+  if(s.state.current && s.state.current!==prevCur){ spawnRipple(s.state.current); }
+}
+
+function spawnRipple(n){ const p=NODES[n]; if(p) ripples.push({x:p[0],y:p[1],t:0}); }
+
+// ── 루프 ──
+function loop(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  // 아바타 이동
+  let vx=0,vy=0;
+  if(keys['w']||keys['arrowup'])vy-=1; if(keys['s']||keys['arrowdown'])vy+=1;
+  if(keys['a']||keys['arrowleft'])vx-=1; if(keys['d']||keys['arrowright'])vx+=1;
+  if(vx||vy){ const l=Math.hypot(vx,vy); vx/=l; vy/=l; avatar.dx=vx; avatar.dy=vy;
+    const spd=320; avatar.x+=vx*spd*dt; avatar.y+=vy*spd*dt;
+    avatar.x=Math.max(20,Math.min(WORLD.w-20,avatar.x));
+    avatar.y=Math.max(20,Math.min(WORLD.h-20,avatar.y)); }
+  // 아바타 근접 발견(안개 걷힘 연출용)
+  for(const n in NODES){ const p=NODES[n];
+    if(Math.hypot(p[0]-avatar.x,p[1]-avatar.y)<R+34) discoveredByRoam.add(n); }
+  // 카메라(아바타 추적, 월드 경계 클램프)
+  cam.x=clamp(avatar.x-view.w/2,0,Math.max(0,WORLD.w-view.w));
+  cam.y=clamp(avatar.y-view.h/2,0,Math.max(0,WORLD.h-view.h));
+  // 탐색 자동 재생
+  if(playing){ playAcc+=dt; if(playAcc>=0.62){ playAcc=0;
+    if(idx>=TRACE.length-1){ playing=false; $('play').textContent='▶ 탐색 재생'; }
+    else setIdx(idx+1); } }
+  // 리플 수명
+  ripples.forEach(r=>r.t+=dt); ripples=ripples.filter(r=>r.t<1.1);
+  render();
+  requestAnimationFrame(loop);
+}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function render(){
+  const s=snap();
+  ctx.clearRect(0,0,view.w,view.h);
+  // 배경 그리드(세계 바닥)
+  ctx.save(); ctx.translate(-cam.x,-cam.y);
+  drawTerrain();
+  // 간선(길)
+  for(const [u,v] of EDGES){
+    const a=NODES[u],b=NODES[v];
+    const hot = s.state.edge && ((s.state.edge[0]===u&&s.state.edge[1]===v)||(s.state.edge[0]===v&&s.state.edge[1]===u));
+    const known = known_(u,s)&&known_(v,s);
+    ctx.strokeStyle= hot?getVar('--path-hot'):getVar('--path');
+    ctx.globalAlpha= hot?1:(known?0.9:0.28);
+    ctx.lineWidth= hot?8:5; ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  // 리플(발견 파동)
+  for(const r of ripples){ const e=1-r.t/1.1;
+    ctx.strokeStyle=getVar('--current'); ctx.globalAlpha=e*0.5; ctx.lineWidth=4;
+    ctx.beginPath(); ctx.arc(r.x,r.y,R+r.t*120,0,7); ctx.stroke(); }
+  ctx.globalAlpha=1;
+  // 장소(노드)
+  for(const n in NODES){ drawPlace(n,s); }
+  // 아바타
+  drawAvatar();
+  ctx.restore();
+  drawMini(s);
+}
+
+function known_(n,s){ return discoveredByRoam.has(n) || nodeState(n,s)!=='undisc'; }
+
+function drawTerrain(){
+  // 은은한 격자 + 비네트 느낌
+  ctx.fillStyle=getVar('--terrain-a'); ctx.fillRect(0,0,WORLD.w,WORLD.h);
+  ctx.strokeStyle=getVar('--grid'); ctx.globalAlpha=0.5; ctx.lineWidth=1;
+  for(let x=0;x<=WORLD.w;x+=80){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,WORLD.h); ctx.stroke(); }
+  for(let y=0;y<=WORLD.h;y+=80){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(WORLD.w,y); ctx.stroke(); }
+  ctx.globalAlpha=1;
+}
+
+function drawPlace(n,s){
+  const [x,y]=NODES[n]; const st=nodeState(n,s); const known=known_(n,s);
+  const col=COL[st];
+  // 안개: 미발견이고 아바타도 근접 안했으면 흐릿
+  ctx.globalAlpha = known?1:0.4;
+  // glow
+  if(st==='current'){ ctx.shadowColor=col; ctx.shadowBlur=30; }
+  ctx.beginPath(); ctx.arc(x,y,R,0,7); ctx.fillStyle=col; ctx.fill(); ctx.shadowBlur=0;
+  // 테두리
+  ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.stroke();
+  // 이름
+  ctx.globalAlpha=1; ctx.fillStyle= known?'#fff':'rgba(230,237,245,.5)';
+  ctx.font='700 22px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(known?n:'?', x, y);
+  // 거리 라벨
+  const d=s.state.dist[n];
+  ctx.font='12px sans-serif'; ctx.fillStyle='rgba(230,237,245,.8)';
+  ctx.fillText(d===undefined?'':`d=${d}`, x, y+R+14);
+}
+
+function drawAvatar(){
+  const {x,y,dx,dy}=avatar;
+  ctx.save(); ctx.translate(x,y);
+  ctx.beginPath(); ctx.arc(0,0,16,0,7); ctx.fillStyle=getVar('--avatar'); ctx.fill();
+  ctx.lineWidth=3; ctx.strokeStyle='#fff'; ctx.stroke();
+  // 시선 방향 표시
+  const a=Math.atan2(dy,dx);
+  ctx.beginPath(); ctx.moveTo(Math.cos(a)*10,Math.sin(a)*10);
+  ctx.lineTo(Math.cos(a)*26,Math.sin(a)*26); ctx.strokeStyle=getVar('--avatar'); ctx.lineWidth=5; ctx.stroke();
+  ctx.restore();
+}
+
+function drawMini(s){
+  const W=mini.getBoundingClientRect().width, H=mini.getBoundingClientRect().height;
+  mctx.clearRect(0,0,W,H); const sx=W/WORLD.w, sy=H/WORLD.h;
+  mctx.strokeStyle=getVar('--path'); mctx.globalAlpha=.6; mctx.lineWidth=1;
+  for(const [u,v] of EDGES){ const a=NODES[u],b=NODES[v];
+    mctx.beginPath(); mctx.moveTo(a[0]*sx,a[1]*sy); mctx.lineTo(b[0]*sx,b[1]*sy); mctx.stroke(); }
+  mctx.globalAlpha=1;
+  for(const n in NODES){ const p=NODES[n];
+    mctx.fillStyle=COL[nodeState(n,s)]; mctx.beginPath(); mctx.arc(p[0]*sx,p[1]*sy,4,0,7); mctx.fill(); }
+  mctx.fillStyle=getVar('--avatar'); mctx.beginPath(); mctx.arc(avatar.x*sx,avatar.y*sy,3.5,0,7); mctx.fill();
+  // 뷰포트 사각형
+  mctx.strokeStyle='rgba(255,255,255,.5)'; mctx.strokeRect(cam.x*sx,cam.y*sy,view.w*sx,view.h*sy);
+}
+
+// 시작
+if(TRACE.length){ setIdx(0); } else {
+  $('label').textContent='trace 없음'; $('note').textContent='trace_bfs.py 로 trace.json 을 생성하세요.';
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

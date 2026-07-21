@@ -46,6 +46,22 @@ flowchart LR
 - `index.html` : SVG 그래프 + 타임라인 슬라이더 + 큐/거리 패널로 재생
 - 자세히: [microworlds/bfs/README.md](../microworlds/bfs/README.md)
 
+### 문서형 vs 아바타/월드형 — 같은 데이터, 다른 경험
+
+마이크로월드는 "읽는 디버거"에 머물 필요가 없습니다. 같은 `trace.json`으로 **세계에 들어가 겪는**
+아바타/월드형 경험도 만들 수 있습니다 — [`microworlds/bfs-world/`](../microworlds/bfs-world/).
+
+![BFS 탐험 월드](../microworlds/bfs-world/preview.png)
+
+| | `bfs/` (문서형) | `bfs-world/` (아바타/월드형) |
+|--|--|--|
+| 시점 | 밖에서 관찰 | 세계 안 아바타로 존재 |
+| 조작 | 타임라인 스크럽 | 자유 이동(WASD) + 탐색 목격 |
+| 이해 | 읽고 분석 | 겪고 감각 |
+
+핵심: **트레이스 데이터는 동일**하고 렌더링 계층만 교체했습니다. "감각적·직관적 이해"라는
+마이크로월드의 취지를 끝까지 밀면 이 방향(월드형)이 됩니다.
+
 ## trace.json 형식
 
 ```json
