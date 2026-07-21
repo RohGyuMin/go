@@ -62,6 +62,16 @@ flowchart LR
 핵심: **트레이스 데이터는 동일**하고 렌더링 계층만 교체했습니다. "감각적·직관적 이해"라는
 마이크로월드의 취지를 끝까지 밀면 이 방향(월드형)이 됩니다.
 
+### 웹앱 버전 — Next.js + React ([`web/`](../web/))
+
+단일 HTML을 넘어 **제대로 된 웹앱**으로 만든 버전입니다. BFS 로직을 순수 함수(`web/lib/bfs.ts`)로
+분리하고, `web/components/BfsWorld.tsx`가 이를 타임라인으로 재생합니다.
+
+- **시작 노드를 클릭하면 즉시 재탐색**(BFS를 새로 계산) — 정적 버전엔 없던 상호작용
+- 재생 속도 조절, 부드러운 색 전이, 키보드, 라이트/다크 자동
+- `output: "export"`로 **정적 빌드**(서버 불필요) → GitHub Pages 등 무료 호스팅
+- 실행: `cd web && npm install && npm run dev` · 빌드: `npm run build`(→ `out/`)
+
 ## trace.json 형식
 
 ```json
