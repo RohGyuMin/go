@@ -1,6 +1,6 @@
 ---
 description: 설명 문서/설계 결정 요약을 팀 공유 공간(Notion/Slack)으로 내보내 집단 리뷰를 시작한다
-argument-hint: [notion | slack] [대상 문서 경로(선택)]
+argument-hint: "[notion | slack] [대상 문서 경로(선택)]"
 ---
 
 당신은 "1:1 AI 루프"를 "팀의 집단적 이해"로 확장합니다. 아래 절차로 요약을 공유 공간에 올립니다.

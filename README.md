@@ -12,13 +12,26 @@ AI가 코드를 **빠르게 작성**하는 시대에, 병목은 작성 속도가
 | 2. **마이크로월드** | 코드를 읽는 대신 *시각적 디버거/시뮬레이션*으로 시스템 메커니즘을 감각적으로 이해 | `/micro-world`, `templates/micro-world/` |
 | 3. **공유 공간 연동** | 1:1 AI 루프에서 벗어나 팀의 *집단적 이해*를 유지 (Notion/Slack) | `/share-to-space`, 운영 가이드 |
 
-## 5분 안에 시작하기
+## 팀 전체에 배포 (플러그인) ⭐ 권장
+
+한 번 설치하면 **모든 프로젝트**에서 커맨드가 뜨고, 팀원 각자도 두 줄로 설치됩니다. (커맨드는
+`/ai-collab:explain-diff` 처럼 네임스페이스가 붙습니다.)
+
+```bash
+/plugin marketplace add RohGyuMin/go          # 마켓플레이스 등록
+/plugin install ai-collab@rohgyumin-plugins   # 플러그인 설치
+```
+
+로컬 테스트: `/plugin marketplace add ./` 후 위 install, 또는 `claude --plugin-dir ./plugin`.
+플러그인 상세는 [plugin/README.md](plugin/README.md).
+
+## 5분 안에 시작하기 (플러그인 없이 스크립트로)
 
 ```bash
 # 1) git 훅 설치 (push 전 설명문서+퀴즈 리마인더) — 이 프로젝트에만
 ./scripts/install-hooks.sh
 
-# 1-b) 모든 프로젝트에 한 번에 반영 (커맨드 + 규칙 + 전역 git 훅)
+# 1-b) 모든 프로젝트에 한 번에 반영 (커맨드 + 규칙 + 전역 git 훅) — 개인 머신 단위
 ./scripts/install-global.sh --all
 
 # 1-c) (선택) 설명 문서를 Obsidian 볼트에도 축적하려면

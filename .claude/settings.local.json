@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "rohgyumin-plugins": {
+      "source": {
+        "source": "directory",
+        "path": "/home/user/go"
+      }
+    }
+  }
+}

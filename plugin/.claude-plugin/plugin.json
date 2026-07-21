@@ -1,0 +1,9 @@
+{
+  "name": "ai-collab",
+  "displayName": "AI 협업 시스템",
+  "version": "1.0.0",
+  "description": "코드 변경마다 맥락·의도를 담은 설명 문서 + 5문항 자가검증 퀴즈를 자동 생성(+ Obsidian 저장), 시각적 마이크로월드, 공유공간 연동을 모든 프로젝트에 제공합니다.",
+  "author": { "name": "RohGyuMin" },
+  "keywords": ["ai-collaboration", "code-understanding", "documentation", "quiz", "micro-world", "obsidian"],
+  "commands": ["./commands/"]
+}
