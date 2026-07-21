@@ -115,8 +115,9 @@
 /* 업무 보드 */
 .board {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
   gap: 10px;
+  overflow-x: auto;
 }
 .col {
   background: var(--panel2);
@@ -158,6 +159,31 @@
   border-left: 2px solid var(--done);
   border-radius: 4px;
   white-space: pre-wrap;
+}
+.files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.file {
+  font-size: 10.5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+.pr {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+}
+.pr:hover {
+  text-decoration: underline;
 }
 
 .addForm {

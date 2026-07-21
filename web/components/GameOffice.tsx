@@ -9,10 +9,11 @@ import {
 } from "@/lib/game";
 import styles from "./GameOffice.module.css";
 
-const COLS: { key: TaskStatus; label: string }[] = [
-  { key: "todo", label: "할 일" },
-  { key: "doing", label: "진행 중" },
-  { key: "done", label: "완료" },
+const COLS: { key: TaskStatus; label: string; match: (s: TaskStatus) => boolean }[] = [
+  { key: "todo", label: "할 일", match: (s) => s === "todo" },
+  { key: "doing", label: "진행 중", match: (s) => s === "doing" || s === "blocked" },
+  { key: "review", label: "리뷰 대기", match: (s) => s === "review" },
+  { key: "done", label: "완료", match: (s) => s === "done" },
 ];
 
 function uid(prefix: string) {
@@ -132,9 +133,7 @@ export default function GameOffice() {
         <div>
           <div className={styles.board}>
             {COLS.map((col) => {
-              const items = state.tasks.filter((t) =>
-                col.key === "done" ? t.status === "done" : t.status === col.key || (col.key === "doing" && t.status === "blocked"),
-              );
+              const items = state.tasks.filter((t) => col.match(t.status));
               return (
                 <div key={col.key} className={styles.col}>
                   <div className={styles.colHead}>
@@ -147,8 +146,25 @@ export default function GameOffice() {
                       <div className={styles.taskMeta}>
                         담당: {agentName(t.assignee)}
                         {t.status === "blocked" ? " · ⛔ 막힘" : ""}
+                        {t.status === "review" ? " · 🔎 확인 대기" : ""}
                       </div>
-                      {t.result && <div className={styles.taskResult}>✅ {t.result}</div>}
+                      {t.result && (
+                        <div className={styles.taskResult}>
+                          {t.status === "review" ? "📝" : "✅"} {t.result}
+                        </div>
+                      )}
+                      {t.changedFiles && t.changedFiles.length > 0 && (
+                        <div className={styles.files}>
+                          {t.changedFiles.map((f) => (
+                            <span key={f} className={styles.file}>{f}</span>
+                          ))}
+                        </div>
+                      )}
+                      {t.prUrl && (
+                        <a className={styles.pr} href={t.prUrl} target="_blank" rel="noreferrer">
+                          🔗 PR 보기
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>
