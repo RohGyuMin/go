@@ -1,0 +1,21 @@
+{
+  "agents": [
+    { "id": "nova", "name": "노바", "role": "프론트엔드 엔지니어", "emoji": "🛠️", "status": "idle" },
+    { "id": "echo", "name": "에코", "role": "리서처", "emoji": "🔎", "status": "idle" },
+    { "id": "pax", "name": "팩스", "role": "코드 리뷰어", "emoji": "🧪", "status": "idle" }
+  ],
+  "tasks": [
+    {
+      "id": "t1",
+      "title": "샘플 업무: microworlds README 오타 점검",
+      "detail": "microworlds/ 하위 README들의 오타/깨진 링크를 훑고 요약해줘.",
+      "assignee": "echo",
+      "status": "todo",
+      "createdBy": "player"
+    }
+  ],
+  "chat": [
+    { "id": "m1", "agent": "nova", "from": "agent", "text": "안녕! 나는 노바야. 프론트엔드 업무를 맡길 수 있어." }
+  ],
+  "rev": 1
+}
