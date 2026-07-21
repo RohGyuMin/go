@@ -34,6 +34,18 @@ flowchart LR
 
 `/micro-world <대상>` 슬래시 커맨드가 1~3을 자동 스캐폴딩합니다.
 
+## 완성 예시 — BFS 타임라인 디버거
+
+[`microworlds/bfs/`](../microworlds/bfs/)에 실제로 동작하는 예시가 있습니다.
+`index.html`을 브라우저로 더블클릭하면 그래프 BFS를 타임라인으로 스크럽하며 큐·방문·거리 변화를
+관찰할 수 있습니다(추적 데이터 인라인 임베드 → 실행환경 불필요).
+
+![BFS 마이크로월드](../microworlds/bfs/preview.png)
+
+- `trace_bfs.py` : BFS에 `snap()` 계측을 심어 `trace.json`(41개 스냅샷)을 생성
+- `index.html` : SVG 그래프 + 타임라인 슬라이더 + 큐/거리 패널로 재생
+- 자세히: [microworlds/bfs/README.md](../microworlds/bfs/README.md)
+
 ## trace.json 형식
 
 ```json
