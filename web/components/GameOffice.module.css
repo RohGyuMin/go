@@ -10,6 +10,9 @@
   --doing: #f59e0b;
   --done: #22c55e;
   --blocked: #ef4444;
+  --floor: #0f1626;
+  --grid: #1a2540;
+  --player: #e64980;
   color: var(--fg);
   font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
 }
@@ -43,7 +46,22 @@
   padding: 0 5px;
 }
 
-/* 사무실 — 에이전트 데스크 */
+/* 사무실 2D 맵 */
+.mapWrap {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--floor);
+  margin-bottom: 8px;
+}
+.mapHint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.mapHint b { color: var(--fg); }
+
+/* 사무실 — 에이전트 데스크 (레거시, 미사용) */
 .office {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

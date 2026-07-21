@@ -7,6 +7,7 @@ import {
   type Task,
   type TaskStatus,
 } from "@/lib/game";
+import OfficeMap from "./OfficeMap";
 import styles from "./GameOffice.module.css";
 
 const COLS: { key: TaskStatus; label: string; match: (s: TaskStatus) => boolean }[] = [
@@ -105,28 +106,13 @@ export default function GameOffice() {
         결과·대화를 도로 씁니다. 이 화면은 2초마다 그 변화를 반영합니다. (API 키·비용 0 · Max 구독 안에서)
       </p>
 
-      {/* 사무실: 에이전트 데스크 */}
-      <div className={styles.office}>
-        {agents.map((a) => {
-          const load = state.tasks.filter((t) => t.assignee === a.id && t.status !== "done").length;
-          return (
-            <div
-              key={a.id}
-              className={`${styles.desk} ${sel === a.id ? styles.sel : ""}`}
-              onClick={() => setSel(a.id)}
-            >
-              <span className={`${styles.avatar} ${a.status === "working" ? styles.working : ""}`}>
-                {a.emoji}
-              </span>
-              <div className={styles.deskName}>{a.name}</div>
-              <div className={styles.deskRole}>{a.role}</div>
-              <span className={`${styles.badge} ${a.status === "working" ? styles.working : styles.idle}`}>
-                {a.status === "working" ? "일하는 중…" : `대기 · 업무 ${load}`}
-              </span>
-            </div>
-          );
-        })}
+      {/* 사무실 2D 맵 — 아바타로 걸어다니며 데스크에서 상호작용 */}
+      <div className={styles.mapWrap}>
+        <OfficeMap agents={agents} tasks={state.tasks} selected={sel} onSelect={setSel} />
       </div>
+      <p className={styles.mapHint}>
+        이동 <b>WASD</b>/화살표 · 데스크에 다가가 <b>스페이스</b>로 대화/업무 (데스크 클릭도 가능)
+      </p>
 
       <div className={styles.grid}>
         {/* 업무 보드 */}
