@@ -201,6 +201,31 @@
   border-radius: 5px;
   padding: 1px 6px;
 }
+.approveBtn {
+  margin-top: 8px;
+  width: 100%;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 8px;
+  border: 1px solid var(--done);
+  background: rgba(34, 197, 94, 0.14);
+  color: var(--done);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.approveBtn:hover {
+  background: rgba(34, 197, 94, 0.24);
+}
+.approved {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--done);
+  background: var(--panel2);
+  border-left: 2px solid var(--done);
+  border-radius: 4px;
+  padding: 5px 8px;
+}
 .pr {
   display: inline-block;
   margin-top: 6px;

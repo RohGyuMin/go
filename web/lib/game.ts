@@ -1,9 +1,10 @@
 // AI 사무실 게임 — 공유 상태 타입.
 // 브라우저(게임)와 Claude Code(뇌)가 web/game/state.json 을 통해 이 형태를 주고받는다.
 
-// todo → doing → review(코드 변경됨, 사람 확인 대기) → done
+// todo → doing → review(코드 변경됨, 사람 확인 대기)
+//                     → approved(사람이 승인, 커밋/PR 대기) → done
 // (막히면 blocked)
-export type TaskStatus = "todo" | "doing" | "review" | "done" | "blocked";
+export type TaskStatus = "todo" | "doing" | "review" | "approved" | "done" | "blocked";
 
 export interface Agent {
   id: string;

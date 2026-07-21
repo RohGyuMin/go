@@ -13,7 +13,7 @@ import styles from "./GameOffice.module.css";
 const COLS: { key: TaskStatus; label: string; match: (s: TaskStatus) => boolean }[] = [
   { key: "todo", label: "할 일", match: (s) => s === "todo" },
   { key: "doing", label: "진행 중", match: (s) => s === "doing" || s === "blocked" },
-  { key: "review", label: "리뷰 대기", match: (s) => s === "review" },
+  { key: "review", label: "리뷰 대기", match: (s) => s === "review" || s === "approved" },
   { key: "done", label: "완료", match: (s) => s === "done" },
 ];
 
@@ -93,6 +93,14 @@ export default function GameOffice() {
     });
   };
 
+  // 리뷰 대기 코드 변경을 사람이 승인 → Claude Code 가 실제로 커밋/PR 한다.
+  const approveTask = (id: string) => {
+    save({
+      ...state,
+      tasks: state.tasks.map((t) => (t.id === id ? { ...t, status: "approved" as TaskStatus } : t)),
+    });
+  };
+
   const agentName = (id: string) => agents.find((a) => a.id === id)?.name ?? id;
 
   return (
@@ -137,6 +145,7 @@ export default function GameOffice() {
                         담당: {agentName(t.assignee)}
                         {t.status === "blocked" ? " · ⛔ 막힘" : ""}
                         {t.status === "review" ? " · 🔎 확인 대기" : ""}
+                        {t.status === "approved" ? " · ✅ 승인됨" : ""}
                       </div>
                       {t.result && (
                         <div className={styles.taskResult}>
@@ -149,6 +158,14 @@ export default function GameOffice() {
                             <span key={f} className={styles.file}>{f}</span>
                           ))}
                         </div>
+                      )}
+                      {t.status === "review" && (
+                        <button className={styles.approveBtn} onClick={() => approveTask(t.id)}>
+                          ✅ 승인 (커밋/PR)
+                        </button>
+                      )}
+                      {t.status === "approved" && (
+                        <div className={styles.approved}>✅ 승인됨 · Claude Code가 커밋/PR 대기</div>
                       )}
                       {t.prUrl && (
                         <a className={styles.pr} href={t.prUrl} target="_blank" rel="noreferrer">
