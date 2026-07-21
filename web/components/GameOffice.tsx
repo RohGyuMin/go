@@ -12,7 +12,7 @@ import {
   type Task,
   type TaskStatus,
 } from "@/lib/game";
-import OfficeMap from "./OfficeMap";
+import OfficePhaser from "./OfficePhaser";
 import styles from "./GameOffice.module.css";
 
 const COLS: { key: TaskStatus; label: string; match: (s: TaskStatus) => boolean }[] = [
@@ -174,7 +174,7 @@ export default function GameOffice() {
 
       {/* 사무실 2D 맵 — 아바타로 걸어다니며 데스크에서 상호작용 */}
       <div className={styles.mapWrap}>
-        <OfficeMap agents={agents} tasks={roomTasks} selected={sel} onSelect={setSel} />
+        <OfficePhaser agents={agents} tasks={roomTasks} selected={sel} onSelect={setSel} />
       </div>
       <p className={styles.mapHint}>
         이동 <b>WASD</b>/화살표 · 데스크에 다가가 <b>스페이스</b>로 대화/업무 (데스크 클릭도 가능)
